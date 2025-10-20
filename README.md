@@ -1,4 +1,4 @@
-# Holiday Countdown (iOS)
+# MyNextBreak (iOS)
 
 A SwiftUI app for Singapore that tracks your next day off, the next public holiday, and the next long weekend — plus a planning view that suggests when to take 1–2 days of leave to create 4+ day breaks. Built with SwiftUI and Combine, with on-device caching of public holiday data from data.gov.sg.
 
@@ -54,8 +54,9 @@ No third‑party package dependencies are required.
 Effective: 2025-10-20
 
 ### Overview
-- Holiday Countdown does not collect, share, sell, or track any personal data.
+- MyNextBreak does not collect, share, sell, or track any personal data.
 - The app operates on-device. Network access is only used to download public holiday datasets from data.gov.sg.
+- We do not operate any backend servers. The app runs on your device and only connects to data.gov.sg to download public holiday data.
 
 ### Data We Collect
 - Personal information: none
@@ -68,7 +69,6 @@ Effective: 2025-10-20
 - Working-days preference (Mon–Sun): stored locally on your device to power countdowns and planning.
 - Cached holiday datasets: stored locally to enable offline use and faster startup.
 - Retention: data persists on your device until you delete the app or refresh the holiday cache via Settings → “Refresh Holiday Data”.
-- Backup/sync: iOS may include app data in encrypted device backups if enabled. No data is transmitted to our servers.
 
 ### Tracking and Third Parties
 - No advertising, analytics, or other third‑party SDKs are integrated.
@@ -82,15 +82,6 @@ Effective: 2025-10-20
 - Delete the app to remove all locally stored data and caches.
 - Use Settings → “Refresh Holiday Data” to refresh or replace cached datasets.
 - Adjust working days in Settings at any time.
-
-### Changes to This Policy
-- If features that require data are added in the future, this policy and the App Store privacy labels will be updated prior to release.
-
-### Contact
-- For questions about this policy, contact: your-email@example.com
-
-### App Store Privacy Summary
-- Data Not Collected; Tracking: No.
 
 ## Acknowledgements
 - Public holiday data courtesy of data.gov.sg
