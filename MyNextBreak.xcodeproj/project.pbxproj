@@ -43,9 +43,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0A454A6D2E3368A300127AD9 /* Countdown App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Countdown App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0A454A7A2E3368A400127AD9 /* Countdown AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Countdown AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0A454A842E3368A400127AD9 /* Countdown AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Countdown AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A454A6D2E3368A300127AD9 /* MyNextBreak.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyNextBreak.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A454A7A2E3368A400127AD9 /* MyNextBreakTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyNextBreakTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A454A842E3368A400127AD9 /* MyNextBreakUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyNextBreakUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A454A9A2E336A7D00127AD9 /* HolidayAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayAPI.swift; sourceTree = "<group>"; };
 		0A454A9B2E336A9400127AD9 /* HolidayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayService.swift; sourceTree = "<group>"; };
 		0A454A9C2E336B3500127AD9 /* CountdownModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownModel.swift; sourceTree = "<group>"; };
@@ -121,9 +121,9 @@
 		0A454A6E2E3368A300127AD9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0A454A6D2E3368A300127AD9 /* Countdown App.app */,
-				0A454A7A2E3368A400127AD9 /* Countdown AppTests.xctest */,
-				0A454A842E3368A400127AD9 /* Countdown AppUITests.xctest */,
+				0A454A6D2E3368A300127AD9 /* MyNextBreak.app */,
+				0A454A7A2E3368A400127AD9 /* MyNextBreakTests.xctest */,
+				0A454A842E3368A400127AD9 /* MyNextBreakUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,9 +166,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0A454A6C2E3368A300127AD9 /* Countdown App */ = {
+		0A454A6C2E3368A300127AD9 /* MyNextBreak */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0A454A8E2E3368A400127AD9 /* Build configuration list for PBXNativeTarget "Countdown App" */;
+			buildConfigurationList = 0A454A8E2E3368A400127AD9 /* Build configuration list for PBXNativeTarget "MyNextBreak" */;
 			buildPhases = (
 				0A454A692E3368A300127AD9 /* Sources */,
 				0A454A6A2E3368A300127AD9 /* Frameworks */,
@@ -178,16 +178,16 @@
 			);
 			dependencies = (
 			);
-			name = "Countdown App";
+			name = MyNextBreak;
 			packageProductDependencies = (
 			);
 			productName = "Countdown App";
-			productReference = 0A454A6D2E3368A300127AD9 /* Countdown App.app */;
+			productReference = 0A454A6D2E3368A300127AD9 /* MyNextBreak.app */;
 			productType = "com.apple.product-type.application";
 		};
-		0A454A792E3368A400127AD9 /* Countdown AppTests */ = {
+		0A454A792E3368A400127AD9 /* MyNextBreakTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0A454A912E3368A400127AD9 /* Build configuration list for PBXNativeTarget "Countdown AppTests" */;
+			buildConfigurationList = 0A454A912E3368A400127AD9 /* Build configuration list for PBXNativeTarget "MyNextBreakTests" */;
 			buildPhases = (
 				0A454A762E3368A400127AD9 /* Sources */,
 				0A454A772E3368A400127AD9 /* Frameworks */,
@@ -201,16 +201,16 @@
 			fileSystemSynchronizedGroups = (
 				0A454A7D2E3368A400127AD9 /* Countdown AppTests */,
 			);
-			name = "Countdown AppTests";
+			name = MyNextBreakTests;
 			packageProductDependencies = (
 			);
 			productName = "Countdown AppTests";
-			productReference = 0A454A7A2E3368A400127AD9 /* Countdown AppTests.xctest */;
+			productReference = 0A454A7A2E3368A400127AD9 /* MyNextBreakTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		0A454A832E3368A400127AD9 /* Countdown AppUITests */ = {
+		0A454A832E3368A400127AD9 /* MyNextBreakUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0A454A942E3368A400127AD9 /* Build configuration list for PBXNativeTarget "Countdown AppUITests" */;
+			buildConfigurationList = 0A454A942E3368A400127AD9 /* Build configuration list for PBXNativeTarget "MyNextBreakUITests" */;
 			buildPhases = (
 				0A454A802E3368A400127AD9 /* Sources */,
 				0A454A812E3368A400127AD9 /* Frameworks */,
@@ -224,11 +224,11 @@
 			fileSystemSynchronizedGroups = (
 				0A454A872E3368A400127AD9 /* Countdown AppUITests */,
 			);
-			name = "Countdown AppUITests";
+			name = MyNextBreakUITests;
 			packageProductDependencies = (
 			);
 			productName = "Countdown AppUITests";
-			productReference = 0A454A842E3368A400127AD9 /* Countdown AppUITests.xctest */;
+			productReference = 0A454A842E3368A400127AD9 /* MyNextBreakUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -254,7 +254,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0A454A682E3368A300127AD9 /* Build configuration list for PBXProject "Countdown App" */;
+			buildConfigurationList = 0A454A682E3368A300127AD9 /* Build configuration list for PBXProject "MyNextBreak" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -268,9 +268,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0A454A6C2E3368A300127AD9 /* Countdown App */,
-				0A454A792E3368A400127AD9 /* Countdown AppTests */,
-				0A454A832E3368A400127AD9 /* Countdown AppUITests */,
+				0A454A6C2E3368A300127AD9 /* MyNextBreak */,
+				0A454A792E3368A400127AD9 /* MyNextBreakTests */,
+				0A454A832E3368A400127AD9 /* MyNextBreakUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -342,12 +342,12 @@
 /* Begin PBXTargetDependency section */
 		0A454A7C2E3368A400127AD9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0A454A6C2E3368A300127AD9 /* Countdown App */;
+			target = 0A454A6C2E3368A300127AD9 /* MyNextBreak */;
 			targetProxy = 0A454A7B2E3368A400127AD9 /* PBXContainerItemProxy */;
 		};
 		0A454A862E3368A400127AD9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0A454A6C2E3368A300127AD9 /* Countdown App */;
+			target = 0A454A6C2E3368A300127AD9 /* MyNextBreak */;
 			targetProxy = 0A454A852E3368A400127AD9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -479,6 +479,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6SVRCQ9AH5;
@@ -488,18 +489,21 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kevinlim.Countdown-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -508,6 +512,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6SVRCQ9AH5;
@@ -517,18 +522,21 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kevinlim.Countdown-App";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -547,7 +555,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Countdown App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Countdown App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MyNextBreak.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MyNextBreak";
 			};
 			name = Debug;
 		};
@@ -566,7 +574,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Countdown App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Countdown App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MyNextBreak.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MyNextBreak";
 			};
 			name = Release;
 		};
@@ -607,7 +615,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0A454A682E3368A300127AD9 /* Build configuration list for PBXProject "Countdown App" */ = {
+		0A454A682E3368A300127AD9 /* Build configuration list for PBXProject "MyNextBreak" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0A454A8C2E3368A400127AD9 /* Debug */,
@@ -616,7 +624,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0A454A8E2E3368A400127AD9 /* Build configuration list for PBXNativeTarget "Countdown App" */ = {
+		0A454A8E2E3368A400127AD9 /* Build configuration list for PBXNativeTarget "MyNextBreak" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0A454A8F2E3368A400127AD9 /* Debug */,
@@ -625,7 +633,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0A454A912E3368A400127AD9 /* Build configuration list for PBXNativeTarget "Countdown AppTests" */ = {
+		0A454A912E3368A400127AD9 /* Build configuration list for PBXNativeTarget "MyNextBreakTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0A454A922E3368A400127AD9 /* Debug */,
@@ -634,7 +642,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0A454A942E3368A400127AD9 /* Build configuration list for PBXNativeTarget "Countdown AppUITests" */ = {
+		0A454A942E3368A400127AD9 /* Build configuration list for PBXNativeTarget "MyNextBreakUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0A454A952E3368A400127AD9 /* Debug */,

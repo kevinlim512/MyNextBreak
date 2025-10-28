@@ -69,7 +69,10 @@ struct CountdownCard: View {
                 
                 // Countdown timer with custom font
                 Text(countdown)
-                    .font(.countdownFont(size: 56))
+                    .font(.countdownFont(size: 48))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .allowsTightening(true)
                     .foregroundColor(.white)
                     .shadow(radius: 4)
                 
