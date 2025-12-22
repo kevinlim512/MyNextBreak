@@ -5,13 +5,19 @@ import SwiftUI
 struct ContentView: View {
     // MARK: - State Properties
     @StateObject private var model = CountdownModel()  // Main data model for countdown calculations
+    @StateObject private var customStore = CustomEventStore.shared
+    @State private var editingEvent: CustomEvent? = nil
     @State private var selectedIndex = 0               // Currently selected card index (0-2)
     @State private var dragOffset: CGFloat = 0         // Drag offset for swipe gestures
     @State private var showSettings = false            // Controls settings sheet presentation
+    @State private var showAddCountdown = false         // Controls add-countdown sheet
     @State private var selectedTab: NavTab = .countdowns // Currently selected navigation tab
     @State private var workingDaysChangedWhileInSettings = false // Track change source
     @State private var workingDaysBeforeSettings: String? = nil   // Snapshot when opening settings
     @State private var showWorkingDaysUpdatedDialog = false      // Controls confirmation dialog
+    @State private var showCountdownDeletedDialog = false        // Shows after a countdown is deleted
+    @State private var lastDeletedCountdownTitle: String? = nil  // Title of the deleted countdown
+    @State private var countdownsRefreshID = UUID()              // Forces countdown tab to refresh
     @AppStorage("hasCompletedSetup") private var hasCompletedSetup: Bool = false
     
     // User's working days configuration (Monday-Sunday, true=working, false=off)
@@ -39,7 +45,9 @@ struct ContentView: View {
             }
         }()
 
-        return [nonWorkingTitle, "Next Public Holiday", "Next Long Weekend"]
+        var titles = [nonWorkingTitle, "Next Public Holiday", "Next Long Weekend"]
+        titles.append(contentsOf: customStore.events.map { $0.title })
+        return titles
     }
 
     private let gradients: [LinearGradient] = [
@@ -77,7 +85,12 @@ struct ContentView: View {
                     dragOffset: $dragOffset,
                     geo: geo,
                     cardTitles: cardTitles,
-                    gradients: gradients
+                    gradients: gradients,
+                    customEvents: customStore.events,
+                    customPalette: AppGradients.customEvent,
+                    onEditCustomEvent: { event in
+                        editingEvent = event
+                    }
                 )
 
                 // Page indicator dots (clickable for navigation)
@@ -109,8 +122,15 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             NavigationStack {
                 countdownSection
+                    .id(countdownsRefreshID)
                     .navigationTitle("Countdowns")
                     .toolbar {
+                        // Add button to the left of Settings
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(action: { showAddCountdown = true }) {
+                                Image(systemName: "plus")
+                            }
+                        }
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button(action: { showSettings = true }) {
                                 Image(systemName: "gearshape")
@@ -122,6 +142,20 @@ struct ContentView: View {
                 Label("Countdowns", systemImage: "hourglass")
             }
             .tag(NavTab.countdowns)
+            // Add Countdown sheet
+            .sheet(isPresented: $showAddCountdown) {
+                AddCountdownView { event in
+                    customStore.add(event)
+                    // Jump to the newly added custom event at the end
+                    let baseCount = 3
+                    let newIndex = baseCount + customStore.events.count - 1
+                    DispatchQueue.main.async {
+                        selectedTab = .countdowns
+                        selectedIndex = newIndex
+                        countdownsRefreshID = UUID()
+                    }
+                }
+            }
 
             NavigationStack {
                 PlanView()
@@ -149,12 +183,30 @@ struct ContentView: View {
             SettingsView(onSaveWorkingDays: { workingDaysChangedWhileInSettings = true })
                 .environmentObject(model)
         }
+        // Edit custom countdown sheet
+        .sheet(item: $editingEvent) { event in
+            EditCustomCountdownView(event: event) { result in
+                switch result {
+                case .updated(let updated):
+                    customStore.update(updated)
+                case .deleted(let deleted):
+                    customStore.remove(deleted)
+                    // If we removed the last one and selection is out of bounds, clamp index
+                    let total = 3 + customStore.events.count
+                    if selectedIndex >= total { selectedIndex = max(0, total - 1) }
+                    lastDeletedCountdownTitle = deleted.title
+                    showCountdownDeletedDialog = true
+                case .cancelled:
+                    break
+                }
+            }
+        }
         // Detect working-days changes made within Settings (covers drag-to-dismiss save flows)
-        .onChange(of: workingDaysArray) { _ in
+        .onChange(of: workingDaysArray) {
             if showSettings { workingDaysChangedWhileInSettings = true }
         }
         // Capture snapshot when Settings is opened
-        .onChange(of: showSettings) { isPresenting in
+        .onChange(of: showSettings) { _, isPresenting in
             if isPresenting {
                 workingDaysBeforeSettings = workingDaysArray
             }
@@ -174,6 +226,34 @@ struct ContentView: View {
         } message: {
             Text("The app has been updated to reflect your new working days.")
         }
+        // Small bottom pop-up shown after a countdown has been deleted
+        .overlay(alignment: .bottom) {
+            if showCountdownDeletedDialog {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                    Text("Deleted")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule()
+                        .fill(Color.black.opacity(0.75))
+                )
+                .padding(.bottom, 32)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        withAnimation {
+                            showCountdownDeletedDialog = false
+                        }
+                    }
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: showCountdownDeletedDialog)
     }
 }
 
@@ -211,7 +291,10 @@ struct CountdownPagesView: View {
     @Binding var dragOffset: CGFloat           // Current drag offset for animations
     var geo: GeometryProxy                     // Geometry proxy for screen dimensions
     var cardTitles: [String]                   // Dynamic titles for each card
-    let gradients: [LinearGradient]            // Gradient backgrounds for each countdown card
+    let gradients: [LinearGradient]            // Gradient backgrounds for built-in cards
+    var customEvents: [CustomEvent]            // Custom user-created events
+    var customPalette: [LinearGradient]        // Gradients for custom events
+    var onEditCustomEvent: (CustomEvent) -> Void = { _ in }
 
     private var cardCount: Int { cardTitles.count }          // Total number of countdown cards
     private var cardWidth: CGFloat { geo.size.width }        // Full screen width for cards
@@ -279,13 +362,30 @@ struct CountdownPagesView: View {
                 LoadingCard(message: "Looking for a long weekend…", background: gradients[2], cardHeight: cardHeight)
             }
         default:
-            EmptyView()
+            let eventIndex = idx - 3
+            if eventIndex >= 0 && eventIndex < customEvents.count {
+                let event = customEvents[eventIndex]
+                let style = event.styleIndex ?? 0
+                let background = customPalette.isEmpty ? gradients[0] : customPalette[abs(style) % customPalette.count]
+                let targetDate = event.nextTargetDate()
+                CountdownCard(
+                    title: event.title,
+                    target: targetDate,
+                    countdown: model.countdown(to: targetDate),
+                    background: background,
+                    cardHeight: cardHeight,
+                    subtitle: nil,
+                    onEdit: { onEditCustomEvent(event) }
+                )
+            } else {
+                EmptyView()
+            }
         }
     }
 
     var body: some View {
         ZStack {
-            ForEach(0..<cardCount) { idx in
+            ForEach(0..<cardCount, id: \.self) { idx in
                 cardView(for: idx)
                 .frame(width: cardWidth)
                 .offset(

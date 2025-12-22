@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import WidgetKit
 
 
 
@@ -164,6 +165,15 @@ class CountdownModel: ObservableObject {
             print("🔍 CountdownModel: Found long weekend: \(longWeekend.name) on \(longWeekend.date)")
         } else {
             print("🔍 CountdownModel: No long weekend found")
+        }
+
+        // Mirror the current holiday targets into the shared app group for the widget.
+        let nextHolidayInfo = nextHoliday.map { WidgetHolidayInfo(name: $0.name, date: $0.date) }
+        let nextLongWeekendInfo = nextLongWeekendHoliday.map { WidgetHolidayInfo(name: $0.name, date: $0.date) }
+        let publicChanged = WidgetHolidayInfo.storeNextPublicHoliday(nextHolidayInfo)
+        let longWeekendChanged = WidgetHolidayInfo.storeNextLongWeekend(nextLongWeekendInfo)
+        if publicChanged || longWeekendChanged {
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 

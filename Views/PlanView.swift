@@ -70,8 +70,33 @@ struct PlanView: View {
             return true
         }
         
-        // Generate recommendations for each future holiday
-        let recs = uniqueFutureHolidays.compactMap { holiday in
+        // Combine contiguous multi-day holidays with the same name (e.g., Chinese New Year)
+        // Keep only the first day as the representative to avoid duplicate cards
+        let sortedByNameDate = uniqueFutureHolidays.sorted { lhs, rhs in
+            if lhs.name == rhs.name { return lhs.date < rhs.date }
+            return lhs.name < rhs.name
+        }
+        var combinedFutureHolidays: [Holiday] = []
+        var idx = 0
+        while idx < sortedByNameDate.count {
+            let startHoliday = sortedByNameDate[idx]
+            var j = idx
+            while j + 1 < sortedByNameDate.count,
+                  sortedByNameDate[j + 1].name == startHoliday.name {
+                let d1 = calendar.startOfDay(for: sortedByNameDate[j].date)
+                let d2 = calendar.startOfDay(for: sortedByNameDate[j + 1].date)
+                if let diff = calendar.dateComponents([.day], from: d1, to: d2).day, diff == 1 {
+                    j += 1
+                } else {
+                    break
+                }
+            }
+            combinedFutureHolidays.append(startHoliday)
+            idx = j + 1
+        }
+
+        // Generate recommendations for each combined future holiday
+        let recs = combinedFutureHolidays.compactMap { holiday in
             LeaveRecommendation.createRecommendation(
                 for: holiday,
                 workingDays: workingDays,
@@ -135,6 +160,7 @@ struct PlanView: View {
 /// Card view for displaying a single leave recommendation
 struct LeaveRecommendationCard: View {
     let recommendation: LeaveRecommendation
+    @AppStorage("workingDaysArray") private var workingDaysArray: String = "true,true,true,true,true,false,false"
     
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -142,11 +168,7 @@ struct LeaveRecommendationCard: View {
         return formatter
     }()
     
-    private static let shortDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter
-    }()
+    // Removed short date formatter as chips are no longer shown
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -174,26 +196,18 @@ struct LeaveRecommendationCard: View {
                     .background(Color.blue)
                     .clipShape(Capsule())
             }
-            
-            // Leave dates
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Take leave on:")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                HStack {
-                    ForEach(recommendation.recommendedLeaveDates, id: \.self) { date in
-                        Text(Self.shortDateFormatter.string(from: date))
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.orange)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
+
+            // Week visualization around the holiday with leave arrow indicators
+            WeekStripView(
+                holiday: recommendation.holiday,
+                leaveDates: recommendation.recommendedLeaveDates,
+                workingDays: workingDaysArray.split(separator: ",").map { $0 == "true" },
+                blockDays: recommendation.blockDays,
+                holidayDates: recommendation.holidayDates
+            )
+            .padding(.top, 4)
+
+            // Removed explicit "Take leave on" chips; week strip conveys this
             
             // Reasoning
             Text(recommendation.reasoning)
@@ -206,6 +220,148 @@ struct LeaveRecommendationCard: View {
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+    }
+}
+
+/// Compact Monday–Sunday week strip highlighting the holiday, non-working days, and leave suggestion(s)
+private struct WeekStripView: View {
+    let holiday: Holiday
+    let leaveDates: [Date]
+    let workingDays: [Bool] // Monday..Sunday
+    let blockDays: [Date]
+    let holidayDates: [Date]
+
+    private let calendar = Calendar.singapore
+
+    private var weekDays: [Date] {
+        let day = calendar.startOfDay(for: holiday.date)
+        let weekday = calendar.component(.weekday, from: day)
+        // Convert to Monday=0..Sunday=6
+        let workIndex = (weekday + 5) % 7
+        guard let monday = calendar.date(byAdding: .day, value: -workIndex, to: day) else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday).map { calendar.startOfDay(for: $0) } }
+    }
+
+    private var previousWeekDays: [Date] {
+        guard let currentMonday = weekDays.first,
+              let prevMonday = calendar.date(byAdding: .day, value: -7, to: currentMonday) else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: prevMonday).map { calendar.startOfDay(for: $0) } }
+    }
+
+    private var needsPreviousWeek: Bool {
+        guard let currentMonday = weekDays.first else { return false }
+        return blockDays.contains { calendar.startOfDay(for: $0) < currentMonday }
+    }
+
+    private func isSameDay(_ a: Date, _ b: Date) -> Bool {
+        calendar.isDate(a, inSameDayAs: b)
+    }
+
+    private func isNonWorkingDay(_ date: Date) -> Bool {
+        let weekday = calendar.component(.weekday, from: date)
+        let idx = (weekday + 5) % 7
+        guard workingDays.indices.contains(idx) else { return false }
+        return !workingDays[idx]
+    }
+
+    private func isLeave(_ date: Date) -> Bool {
+        leaveDates.contains { isSameDay($0, date) }
+    }
+
+    private func weekdaySymbol(for date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_SG")
+        f.dateFormat = "E" // Mon, Tue, ...
+        return f.string(from: date)
+    }
+
+    private func dayNumber(_ date: Date) -> String {
+        let d = calendar.component(.day, from: date)
+        return String(d)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if needsPreviousWeek {
+                HStack(spacing: 8) {
+                    ForEach(previousWeekDays, id: \.self) { day in
+                        dayCell(day)
+                    }
+                }
+            }
+
+            HStack(spacing: 8) {
+                ForEach(weekDays, id: \.self) { day in
+                    dayCell(day)
+                }
+            }
+
+            // Legend
+            HStack(spacing: 12) {
+                LegendSwatch(color: .blue, label: "Holiday")
+                LegendSwatch(color: .orange, label: "Take Leave")
+                LegendSwatch(color: .red, label: "Non-working")
+            }
+            .font(.caption2)
+            .foregroundColor(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func dayCell(_ day: Date) -> some View {
+        let markHoliday = holidayDates.contains { isSameDay($0, day) } || isSameDay(day, holiday.date)
+        let leave = isLeave(day)
+        let nonWorking = isNonWorkingDay(day)
+
+        VStack(spacing: 4) {
+            // Arrow suggesting leave day
+            Group {
+                if leave {
+                    Image(systemName: "arrow.down")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                } else {
+                    Color.clear.frame(height: 0)
+                }
+            }
+
+            VStack(spacing: 2) {
+                Text(weekdaySymbol(for: day))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Text(dayNumber(day))
+                    .font(.caption)
+                    .fontWeight(markHoliday ? .bold : .regular)
+                    .foregroundColor(.white)
+                    .frame(width: 32, height: 24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(
+                                markHoliday ? Color.blue : (leave ? Color.orange : (nonWorking ? Color.red : Color.gray.opacity(0.35)))
+                            )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.black.opacity(0.05), lineWidth: 0.5)
+                    )
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel(Text("\(weekdaySymbol(for: day)) \(dayNumber(day))" + (markHoliday ? ", Holiday" : (leave ? ", Leave" : (nonWorking ? ", Non-working" : "")))))
+    }
+}
+
+private struct LegendSwatch: View {
+    let color: Color
+    let label: String
+    var body: some View {
+        HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(color)
+                .frame(width: 14, height: 10)
+            Text(label)
+        }
     }
 }
 

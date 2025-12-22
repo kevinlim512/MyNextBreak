@@ -21,6 +21,18 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
+                // Widget configuration section (moved to top)
+                Section(header: Text("Widget")) {
+                    NavigationLink {
+                        EditWidgetView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "rectangle.grid.2x2")
+                            Text("Choose Widget Countdown")
+                        }
+                    }
+                }
+
                 // Working Days Configuration Section
                 Section(header: Text("Working Days")) {
                     VStack(alignment: .leading, spacing: 16) {

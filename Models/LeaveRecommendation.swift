@@ -14,6 +14,8 @@ struct LeaveRecommendation: Identifiable {
     let recommendedLeaveDates: [Date]       // Dates the user should take leave
     let totalDaysOff: Int                   // Total consecutive days off (including holiday and weekends)
     let reasoning: String                   // Human-readable explanation
+    let blockDays: [Date]                   // Full sequence of days in the suggested long-weekend block
+    let holidayDates: [Date]                // All holiday dates within the block (handles multi-day holidays)
     
     /// Creates a leave recommendation for a specific holiday scenario
     /// - Parameters:
@@ -130,11 +132,16 @@ struct LeaveRecommendation: Identifiable {
         
         let reasoning = "Take leave on \(leaveDatesText) to enjoy a \(chosen.block.count)-day long weekend around \(holiday.name)"
         
+        // Collect holiday dates inside the chosen block (e.g., both days of CNY)
+        let holidayDatesInBlock = chosen.block.filter { isHolidayDate($0) }.sorted()
+
         return LeaveRecommendation(
             holiday: holiday,
             recommendedLeaveDates: chosen.leaveDays.sorted(),
             totalDaysOff: chosen.block.count,
-            reasoning: reasoning
+            reasoning: reasoning,
+            blockDays: chosen.block.sorted(),
+            holidayDates: holidayDatesInBlock
         )
     }
 }

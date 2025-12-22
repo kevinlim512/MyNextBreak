@@ -17,6 +17,7 @@ struct CountdownCard: View {
     let background: LinearGradient  // Gradient background for the card
     let cardHeight: CGFloat   // Fixed height for consistent card sizing
     let subtitle: String?  // Optional subtitle (e.g., holiday name)
+    let onEdit: (() -> Void)?
 
     init(
         title: String,
@@ -24,7 +25,8 @@ struct CountdownCard: View {
         countdown: String,
         background: LinearGradient,
         cardHeight: CGFloat,
-        subtitle: String? = nil
+        subtitle: String? = nil,
+        onEdit: (() -> Void)? = nil
     ) {
         self.title = title
         self.target = target
@@ -32,6 +34,7 @@ struct CountdownCard: View {
         self.background = background
         self.cardHeight = cardHeight
         self.subtitle = subtitle
+        self.onEdit = onEdit
     }
 
     var body: some View {
@@ -39,7 +42,6 @@ struct CountdownCard: View {
             // Background card with rounded corners and shadow
             RoundedRectangle(cornerRadius: 32, style: .continuous)
                 .fill(background)
-                .frame(maxWidth: .infinity, minHeight: cardHeight, maxHeight: cardHeight)
                 .shadow(radius: 16)
 
             // Content stack with vertical spacing
@@ -79,7 +81,32 @@ struct CountdownCard: View {
                 Spacer()
             }
             .padding()
+            // Action button overlay for custom cards
+            if onEdit != nil {
+                VStack {
+                    Spacer()
+                    HStack(spacing: 12) {
+                        if let onEdit = onEdit {
+                            Button(action: onEdit) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "pencil")
+                                    Text("Edit")
+                                }
+                                .font(.headline)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.white.opacity(0.2))
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
+                                .shadow(radius: 4)
+                            }
+                        }
+                    }
+                    .padding(.bottom, 20)
+                }
+            }
         }
+        .frame(maxWidth: .infinity, minHeight: cardHeight, maxHeight: cardHeight)
         .padding(.horizontal, 24)
     }
 }
