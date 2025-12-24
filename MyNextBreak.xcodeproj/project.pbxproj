@@ -38,6 +38,7 @@
 		0AFFB9962EC0F6A700B15302 /* AddCountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFFB9972EC0F6A700B15302 /* AddCountdownView.swift */; };
 		0AFFB9982EC1063D00B15302 /* Gradients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFFB9992EC1063D00B15302 /* Gradients.swift */; };
 		0AFFB99B2EC10BCE00B15302 /* EditCustomCountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFFB99A2EC10BCE00B15302 /* EditCustomCountdownView.swift */; };
+		0B1A1C1E2F3A4B5C6D7E8F90 /* WeeklyDatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1A1C1D2E3F4A5B6C7D8E9F /* WeeklyDatePickerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -113,6 +114,7 @@
 		0AFFB9972EC0F6A700B15302 /* AddCountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCountdownView.swift; sourceTree = "<group>"; };
 		0AFFB9992EC1063D00B15302 /* Gradients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gradients.swift; sourceTree = "<group>"; };
 		0AFFB99A2EC10BCE00B15302 /* EditCustomCountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCustomCountdownView.swift; sourceTree = "<group>"; };
+		0B1A1C1D2E3F4A5B6C7D8E9F /* WeeklyDatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyDatePickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -229,6 +231,7 @@
 				0AFFB9972EC0F6A700B15302 /* AddCountdownView.swift */,
 				0AFFB9992EC1063D00B15302 /* Gradients.swift */,
 				0AFFB99A2EC10BCE00B15302 /* EditCustomCountdownView.swift */,
+				0B1A1C1D2E3F4A5B6C7D8E9F /* WeeklyDatePickerView.swift */,
 				0A822B412E3CDB4600B97D6B /* PlanView.swift */,
 			);
 			path = Views;
@@ -442,6 +445,7 @@
 				0AFFB9962EC0F6A700B15302 /* AddCountdownView.swift in Sources */,
 				0AFFB9982EC1063D00B15302 /* Gradients.swift in Sources */,
 				0AFFB99B2EC10BCE00B15302 /* EditCustomCountdownView.swift in Sources */,
+				0B1A1C1E2F3A4B5C6D7E8F90 /* WeeklyDatePickerView.swift in Sources */,
 				0AFFB9942EC0F62C00B15302 /* CustomEvent.swift in Sources */,
 				0AFFB9952EC0F62C00B15302 /* CustomEventStore.swift in Sources */,
 				0A454AA62E336FB600127AD9 /* HolidayService.swift in Sources */,
@@ -515,7 +519,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kevinlim.Countdown-App.Countdown-App-Widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -545,7 +549,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kevinlim.Countdown-App.Countdown-App-Widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

@@ -20,6 +20,11 @@ struct EditCustomCountdownView: View {
     @State private var repeatsWeekly: Bool
     @State private var weeklyDayOfWeek: Int
     @State private var weeklyInterval: Int
+    @State private var styleIndex: Int
+    @State private var showWeeklyDatePicker: Bool = false
+    private var weeklyDateBackground: Color {
+        Color(.tertiarySystemFill)
+    }
 
     init(event: CustomEvent, onComplete: @escaping (Result) -> Void) {
         self.event = event
@@ -31,6 +36,7 @@ struct EditCustomCountdownView: View {
         _repeatsWeekly = State(initialValue: event.repeatsWeekly)
         _weeklyDayOfWeek = State(initialValue: Calendar.singapore.component(.weekday, from: event.date))
         _weeklyInterval = State(initialValue: max(event.weeklyInterval ?? 1, 1))
+        _styleIndex = State(initialValue: event.styleIndex ?? 0)
     }
 
     var body: some View {
@@ -42,12 +48,54 @@ struct EditCustomCountdownView: View {
                 }
 
                 Section(header: Text("Date & Time")) {
-                    DatePicker("", selection: $date, displayedComponents: [.date, .hourAndMinute])
-                        .labelsHidden()
-                }
+                    VStack(alignment: .leading, spacing: 4) {
+                        if repeatsWeekly {
+                            Text("Start of Countdown:")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                        HStack(spacing: 12) {
+                            if !repeatsMonthly {
+                                if repeatsWeekly {
+                                    Button {
+                                        showWeeklyDatePicker = true
+                                    } label: {
+                                        Text(date, format: .dateTime.day().month().year())
+                                            .foregroundColor(.primary)
+                                            .padding(.vertical, 6)
+                                            .padding(.horizontal, 12)
+                                            .background(
+                                                Capsule()
+                                                    .fill(weeklyDateBackground)
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    ZStack {
+                                        DatePicker("", selection: $date, displayedComponents: [.date])
+                                            .labelsHidden()
+                                            .datePickerStyle(.compact)
+                                            .opacity(0.01)
+                                        Text(date, format: .dateTime.day().month().year())
+                                            .foregroundColor(.primary)
+                                            .padding(.vertical, 6)
+                                            .padding(.horizontal, 12)
+                                            .background(
+                                                Capsule()
+                                                    .fill(weeklyDateBackground)
+                                            )
+                                            .allowsHitTesting(false)
+                                    }
+                                }
+                            }
+                            DatePicker("", selection: $date, displayedComponents: [.hourAndMinute])
+                                .labelsHidden()
+                                .datePickerStyle(.compact)
+                            Spacer(minLength: 0)
+                        }
+                    }
 
-                Section(header: Text("Repeat")) {
-                    Toggle("Every Month", isOn: $repeatsMonthly)
+                    Toggle("Repeat Every Month", isOn: $repeatsMonthly)
                         .onChange(of: repeatsMonthly) { _, isOn in
                             if isOn {
                                 repeatsWeekly = false
@@ -55,23 +103,20 @@ struct EditCustomCountdownView: View {
                         }
 
                     if repeatsMonthly {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Divider()
-                                .padding(.top, 0)
-                                .padding(.bottom, 12)
+                        VStack(spacing: 0) {
                             Text("Day of Month")
-                        }
-                        .listRowSeparator(.hidden)
-                        Picker("Day of Month", selection: $monthlyDay) {
-                            ForEach(1...31, id: \.self) { day in
-                                Text("\(day)")
-                                    .tag(day)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            Picker("Day of Month", selection: $monthlyDay) {
+                                ForEach(1...31, id: \.self) { day in
+                                    Text("\(day)")
+                                        .tag(day)
+                                }
                             }
+                            .pickerStyle(.wheel)
                         }
-                        .pickerStyle(.wheel)
                     }
 
-                    Toggle("Every Week", isOn: $repeatsWeekly)
+                    Toggle("Repeat Every Week", isOn: $repeatsWeekly)
                         .onChange(of: repeatsWeekly) { _, isOn in
                             if isOn {
                                 repeatsMonthly = false
@@ -91,6 +136,31 @@ struct EditCustomCountdownView: View {
                     }
                 }
 
+                Section(header: Text("Card Style")) {
+                    let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(Array(AppGradients.customEvent.enumerated()), id: \.offset) { idx, grad in
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(grad)
+                                    .frame(height: 44)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                            .stroke(styleIndex == idx ? Color.blue : Color.clear, lineWidth: 3)
+                                    )
+                                if styleIndex == idx {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.white)
+                                        .shadow(radius: 3)
+                                }
+                            }
+                            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .onTapGesture { styleIndex = idx }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+
                 Section {
                     Button(role: .destructive) {
                         onComplete(.deleted(event))
@@ -106,6 +176,9 @@ struct EditCustomCountdownView: View {
             }
             .navigationTitle("Edit Countdown")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $showWeeklyDatePicker) {
+                WeeklyDatePickerView(date: $date, weekday: weeklyDayOfWeek)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { onComplete(.cancelled); dismiss() }
@@ -142,12 +215,40 @@ struct EditCustomCountdownView: View {
                         updated.monthlyDay = repeatsMonthly ? monthlyDay : nil
                         updated.repeatsWeekly = repeatsWeekly
                         updated.weeklyInterval = repeatsWeekly ? weeklyInterval : nil
+                        updated.styleIndex = styleIndex
                         onComplete(.updated(updated))
                         dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .onChange(of: repeatsWeekly) { _, isOn in
+                if isOn {
+                    date = alignedWeeklyDate(from: date, weekday: weeklyDayOfWeek)
+                }
+            }
+            .onChange(of: weeklyDayOfWeek) { _, newValue in
+                if repeatsWeekly {
+                    date = alignedWeeklyDate(from: date, weekday: newValue)
+                }
+            }
         }
+    }
+
+    private func alignedWeeklyDate(from date: Date, weekday: Int) -> Date {
+        let calendar = Calendar.singapore
+        let currentWeekday = calendar.component(.weekday, from: date)
+        guard currentWeekday != weekday else { return date }
+        let timeComponents = calendar.dateComponents([.hour, .minute, .second], from: date)
+        var components = calendar.dateComponents([.year, .month, .day], from: date)
+        components.weekday = weekday
+        components.hour = timeComponents.hour
+        components.minute = timeComponents.minute
+        components.second = timeComponents.second
+        return calendar.nextDate(
+            after: date.addingTimeInterval(-60),
+            matching: components,
+            matchingPolicy: .nextTimePreservingSmallerComponents
+        ) ?? date
     }
 }
