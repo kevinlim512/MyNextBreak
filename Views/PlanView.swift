@@ -113,7 +113,14 @@ struct PlanView: View {
             return true
         }
         
-        return uniqueRecs
+        // Present recommendations in chronological order (soonest first).
+        // This avoids cases like New Year's Day appearing at the bottom due to upstream name-based sorting.
+        return uniqueRecs.sorted { lhs, rhs in
+            let l = calendar.startOfDay(for: lhs.holiday.date)
+            let r = calendar.startOfDay(for: rhs.holiday.date)
+            if l != r { return l < r }
+            return lhs.holiday.name < rhs.holiday.name
+        }
     }
     
     var body: some View {
@@ -138,7 +145,7 @@ struct PlanView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        Text("Strategically stack annual leave with upcoming public holidays to maximise your time off.")
+                        Text("Strategically stack your annual leave with upcoming public holidays to maximise your time off.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .padding(.top, 4)
@@ -167,6 +174,12 @@ struct LeaveRecommendationCard: View {
         formatter.dateFormat = "MMM d, yyyy"
         return formatter
     }()
+
+    private static let leaveDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter
+    }()
     
     // Removed short date formatter as chips are no longer shown
     
@@ -186,40 +199,74 @@ struct LeaveRecommendationCard: View {
                 
                 Spacer()
                 
-                // Total days badge
-                Text("\(recommendation.totalDaysOff) days")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue)
-                    .clipShape(Capsule())
+                if recommendation.options.count == 1 {
+                    Text("\(recommendation.maxTotalDaysOff) days")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.blue)
+                        .clipShape(Capsule())
+                }
             }
 
-            // Week visualization around the holiday with leave arrow indicators
-            WeekStripView(
-                holiday: recommendation.holiday,
-                leaveDates: recommendation.recommendedLeaveDates,
-                workingDays: workingDaysArray.split(separator: ",").map { $0 == "true" },
-                blockDays: recommendation.blockDays,
-                holidayDates: recommendation.holidayDates
-            )
-            .padding(.top, 4)
+            VStack(alignment: .leading, spacing: 16) {
+                ForEach(Array(recommendation.options.enumerated()), id: \.element.id) { index, option in
+                    VStack(alignment: .leading, spacing: 12) {
+                        if recommendation.options.count > 1 {
+                            HStack {
+                                Text("Option \(index + 1)")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
 
-            // Removed explicit "Take leave on" chips; week strip conveys this
-            
-            // Reasoning
-            Text(recommendation.reasoning)
-                .font(.body)
-                .foregroundColor(.primary)
-                .padding(.top, 4)
+                                Spacer()
+
+                                Text("\(option.blockDays.count) days")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.blue)
+                                    .clipShape(Capsule())
+                            }
+                        }
+
+                        WeekStripView(
+                            holiday: recommendation.holiday,
+                            leaveDates: option.recommendedLeaveDates,
+                            workingDays: workingDaysArray.split(separator: ",").map { $0 == "true" },
+                            blockDays: option.blockDays,
+                            holidayDates: option.holidayDates
+                        )
+                        .padding(.top, 4)
+
+                        Text(reasoning(for: option))
+                            .font(.body)
+                            .foregroundColor(.primary)
+                    }
+
+                    if index < recommendation.options.count - 1 {
+                        Divider()
+                    }
+                }
+            }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+    }
+
+    private func reasoning(for option: LeaveOption) -> String {
+        let leaveDatesText = option.recommendedLeaveDates
+            .sorted()
+            .map { Self.leaveDateFormatter.string(from: $0) }
+            .joined(separator: ", ")
+        return "Take leave on \(leaveDatesText) to enjoy a \(option.blockDays.count)-day long weekend around \(recommendation.holiday.name)"
     }
 }
 
@@ -248,9 +295,20 @@ private struct WeekStripView: View {
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: prevMonday).map { calendar.startOfDay(for: $0) } }
     }
 
+    private var nextWeekDays: [Date] {
+        guard let currentMonday = weekDays.first,
+              let nextMonday = calendar.date(byAdding: .day, value: 7, to: currentMonday) else { return [] }
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: nextMonday).map { calendar.startOfDay(for: $0) } }
+    }
+
     private var needsPreviousWeek: Bool {
         guard let currentMonday = weekDays.first else { return false }
         return blockDays.contains { calendar.startOfDay(for: $0) < currentMonday }
+    }
+
+    private var needsNextWeek: Bool {
+        guard let currentSunday = weekDays.last else { return false }
+        return blockDays.contains { calendar.startOfDay(for: $0) > currentSunday }
     }
 
     private func isSameDay(_ a: Date, _ b: Date) -> Bool {
@@ -293,6 +351,14 @@ private struct WeekStripView: View {
             HStack(spacing: 8) {
                 ForEach(weekDays, id: \.self) { day in
                     dayCell(day)
+                }
+            }
+
+            if needsNextWeek {
+                HStack(spacing: 8) {
+                    ForEach(nextWeekDays, id: \.self) { day in
+                        dayCell(day)
+                    }
                 }
             }
 

@@ -2,12 +2,12 @@ import SwiftUI
 
 struct WeeklyDatePickerView: View {
     @Binding var date: Date
-    let weekday: Int
+    let weekday: Int?
 
     @Environment(\.dismiss) private var dismiss
     @State private var displayedMonth: Date
 
-    init(date: Binding<Date>, weekday: Int) {
+    init(date: Binding<Date>, weekday: Int? = nil) {
         _date = date
         self.weekday = weekday
         let calendar = Calendar.singapore
@@ -115,7 +115,12 @@ struct WeeklyDatePickerView: View {
         var cells: [DayCell] = Array(repeating: DayCell.empty, count: leadingBlanks)
         for day in range {
             let dayDate = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) ?? startOfMonth
-            let isSelectable = calendar.component(.weekday, from: dayDate) == weekday
+            let isSelectable: Bool
+            if let weekday = weekday {
+                isSelectable = calendar.component(.weekday, from: dayDate) == weekday
+            } else {
+                isSelectable = true
+            }
             let isSelected = calendar.isDate(dayDate, inSameDayAs: date)
             cells.append(DayCell(date: dayDate, day: day, isSelectable: isSelectable, isSelected: isSelected))
         }

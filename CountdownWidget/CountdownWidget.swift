@@ -1,5 +1,8 @@
 import WidgetKit
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct CountdownWidgetEntry: TimelineEntry {
     let date: Date
@@ -77,37 +80,57 @@ struct CountdownWidgetEntryView: View {
     var body: some View {
         GeometryReader { geo in
             let isCompact = geo.size.width < 200
+            let hasSubtitle = !(entry.subtitle?.isEmpty ?? true)
+            let showsNextTimeOffDate = !isCompact && entry.id == WidgetCountdownConfig.nextTimeOffID
+            let hasSecondaryLine = hasSubtitle || showsNextTimeOffDate
             let titleScale = isCompact ? 0.12 : 0.14
             let subtitleScale = isCompact ? 0.105 : 0.12
-            let timeScale = isCompact
-                ? ((entry.subtitle?.isEmpty ?? true) ? 0.52 : 0.46)
-                : ((entry.subtitle?.isEmpty ?? true) ? 0.6 : 0.52)
+            let timeScale: CGFloat = isCompact ? 0.4 : (hasSubtitle ? 0.95 : 0.3)
+            let showSpacer = !isCompact && showsNextTimeOffDate
+            let widgetPadding: CGFloat = isCompact ? 2 : 12
+            let stackSpacing: CGFloat = isCompact ? (hasSubtitle ? 2 : 4) : (hasSecondaryLine ? 8 : 2)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(entry.title)
-                    .font(.system(size: geo.size.height * titleScale, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.6)
+            VStack(alignment: .center, spacing: 0) {
+                VStack(alignment: .center, spacing: stackSpacing) {
+                    Text(entry.title)
+                        .font(.system(size: geo.size.height * titleScale, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.6)
+                        .multilineTextAlignment(.center)
 
-                if let subtitle = entry.subtitle, !subtitle.isEmpty {
-                    Text(subtitle)
-                        .font(.system(size: geo.size.height * subtitleScale, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.95))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                    if showsNextTimeOffDate {
+                        Text(nextTimeOffDateText(for: entry.targetDate))
+                            .font(.system(size: geo.size.height * subtitleScale, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.95))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    if let subtitle = entry.subtitle, !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.system(size: geo.size.height * subtitleScale, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.95))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .multilineTextAlignment(.center)
+                    }
                 }
 
-                Spacer(minLength: 0)
+                if showSpacer {
+                    Spacer(minLength: 0)
+                }
 
                 Text(timeRemaining(to: entry.targetDate))
-                    .font(.system(size: geo.size.height * timeScale, weight: .bold, design: .rounded))
+                    .font(countdownFont(size: geo.size.height * timeScale))
                     .foregroundColor(.white)
                     .minimumScaleFactor(0.3)
                     .lineLimit(1)
+                    .padding(.top, hasSecondaryLine ? 0 : stackSpacing)
             }
-            .padding(12)
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .leading)
+            .padding(widgetPadding)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
             .containerBackground(for: .widget) {
                 widgetBackground(for: entry.id)
             }
@@ -149,6 +172,25 @@ struct CountdownWidgetEntryView: View {
 
         return "\(days)d \(hours)h \(minutes)m"
     }
+
+    private func nextTimeOffDateText(for date: Date) -> String {
+        Self.nextTimeOffDateFormatter.string(from: date)
+    }
+
+    private func countdownFont(size: CGFloat) -> Font {
+        #if canImport(UIKit)
+        if UIFont(name: "Manrope", size: size) != nil {
+            return .custom("Manrope", size: size).weight(.bold)
+        }
+        #endif
+        return .system(size: size, weight: .bold, design: .rounded)
+    }
+
+    private static let nextTimeOffDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, d MMM yyyy"
+        return formatter
+    }()
 }
 
 @main

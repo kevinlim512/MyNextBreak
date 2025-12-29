@@ -28,7 +28,7 @@ struct AddCountdownView: View {
     @State private var weeklyDayOfWeek: Int = Calendar.singapore.component(.weekday, from: Date())
     @State private var weeklyInterval: Int = 1
     @State private var styleIndex: Int = 0
-    @State private var showWeeklyDatePicker: Bool = false
+    @State private var showDatePicker: Bool = false
 
     // Save handler injected by caller
     var onSave: (CustomEvent) -> Void
@@ -105,37 +105,19 @@ struct AddCountdownView: View {
                         }
                         HStack(spacing: 12) {
                             if !repeatsMonthly {
-                                if repeatsWeekly {
-                                    Button {
-                                        showWeeklyDatePicker = true
-                                    } label: {
-                                        Text(date, format: .dateTime.day().month().year())
-                                            .foregroundColor(.primary)
-                                            .padding(.vertical, 6)
-                                            .padding(.horizontal, 12)
-                                            .background(
-                                                Capsule()
-                                                    .fill(weeklyDateBackground)
-                                            )
-                                    }
-                                    .buttonStyle(.plain)
-                                } else {
-                                    ZStack {
-                                        DatePicker("", selection: $date, displayedComponents: [.date])
-                                            .labelsHidden()
-                                            .datePickerStyle(.compact)
-                                            .opacity(0.01)
-                                        Text(date, format: .dateTime.day().month().year())
-                                            .foregroundColor(.primary)
-                                            .padding(.vertical, 6)
-                                            .padding(.horizontal, 12)
-                                            .background(
-                                                Capsule()
-                                                    .fill(weeklyDateBackground)
-                                            )
-                                            .allowsHitTesting(false)
-                                    }
+                                Button {
+                                    showDatePicker = true
+                                } label: {
+                                    Text(date, format: .dateTime.day().month().year())
+                                        .foregroundColor(.primary)
+                                        .padding(.vertical, 6)
+                                        .padding(.horizontal, 12)
+                                        .background(
+                                            Capsule()
+                                                .fill(weeklyDateBackground)
+                                        )
                                 }
+                                .buttonStyle(.plain)
                             }
                             DatePicker("", selection: $date, displayedComponents: [.hourAndMinute])
                                 .labelsHidden()
@@ -219,8 +201,8 @@ struct AddCountdownView: View {
             }
             .navigationTitle("Add Countdown")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $showWeeklyDatePicker) {
-                WeeklyDatePickerView(date: $date, weekday: weeklyDayOfWeek)
+            .navigationDestination(isPresented: $showDatePicker) {
+                WeeklyDatePickerView(date: $date, weekday: repeatsWeekly ? weeklyDayOfWeek : nil)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

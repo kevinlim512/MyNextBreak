@@ -8,7 +8,6 @@ struct ContentView: View {
     @StateObject private var customStore = CustomEventStore.shared
     @State private var editingEvent: CustomEvent? = nil
     @State private var selectedIndex = 0               // Currently selected card index (0-2)
-    @State private var dragOffset: CGFloat = 0         // Drag offset for swipe gestures
     @State private var showSettings = false            // Controls settings sheet presentation
     @State private var showAddCountdown = false         // Controls add-countdown sheet
     @State private var selectedTab: NavTab = .countdowns // Currently selected navigation tab
@@ -82,7 +81,6 @@ struct ContentView: View {
                 CountdownPagesView(
                     model: model,
                     selectedIndex: $selectedIndex,
-                    dragOffset: $dragOffset,
                     geo: geo,
                     cardTitles: cardTitles,
                     gradients: gradients,
@@ -288,13 +286,13 @@ struct CountdownPagesView: View {
     // MARK: - Properties
     @ObservedObject var model: CountdownModel  // Data model for countdown calculations
     @Binding var selectedIndex: Int            // Currently selected card index
-    @Binding var dragOffset: CGFloat           // Current drag offset for animations
     var geo: GeometryProxy                     // Geometry proxy for screen dimensions
     var cardTitles: [String]                   // Dynamic titles for each card
     let gradients: [LinearGradient]            // Gradient backgrounds for built-in cards
     var customEvents: [CustomEvent]            // Custom user-created events
     var customPalette: [LinearGradient]        // Gradients for custom events
     var onEditCustomEvent: (CustomEvent) -> Void = { _ in }
+    @State private var dragOffset: CGFloat = 0         // Local drag offset for swipe gestures
 
     private var cardCount: Int { cardTitles.count }          // Total number of countdown cards
     private var cardWidth: CGFloat { geo.size.width }        // Full screen width for cards
@@ -324,12 +322,14 @@ struct CountdownPagesView: View {
         switch idx {
         case 0:
             // Non-working day countdown card
+            let showWeekday = cardTitles[0] == "Next Time Off"
             CountdownCard(
                 title: cardTitles[0],
                 target: model.nextNonWorkingDate,
                 countdown: model.countdown(to: model.nextNonWorkingDate),
                 background: gradients[0],
-                cardHeight: cardHeight
+                cardHeight: cardHeight,
+                showsWeekday: showWeekday
             )
         case 1:
             // Public Holiday countdown card
@@ -386,22 +386,22 @@ struct CountdownPagesView: View {
     var body: some View {
         ZStack {
             ForEach(0..<cardCount, id: \.self) { idx in
+                let offset = crescentOffset(for: idx)
                 cardView(for: idx)
-                .frame(width: cardWidth)
-                .offset(
-                    x: crescentOffset(for: idx).x + dragOffset,  // Apply crescent layout + drag
-                    y: crescentOffset(for: idx).y
-                )
-                .rotationEffect(.degrees(crescentOffset(for: idx).rotation))  // Apply rotation
-                .scaleEffect(idx == selectedIndex ? 1.0 : 0.9)  // Scale down non-selected cards
-                .opacity(idx == selectedIndex ? 1.0 : 0.7)      // Fade non-selected cards
-                .zIndex(idx == selectedIndex ? 1 : 0)           // Bring selected card to front
+                    .frame(width: cardWidth)
+                    .offset(
+                        x: offset.x + dragOffset,  // Apply crescent layout + drag
+                        y: offset.y
+                    )
+                    .rotationEffect(.degrees(offset.rotation))  // Apply rotation
+                    .scaleEffect(idx == selectedIndex ? 1.0 : 0.9)  // Scale down non-selected cards
+                    .opacity(idx == selectedIndex ? 1.0 : 0.7)      // Fade non-selected cards
+                    .zIndex(idx == selectedIndex ? 1 : 0)           // Bring selected card to front
             }
         }
         .frame(width: cardWidth, height: containerHeight)
         // Snappier, less bouncy spring animations for card transitions
         .animation(.interpolatingSpring(stiffness: 180, damping: 24), value: selectedIndex)
-        .animation(.interpolatingSpring(stiffness: 180, damping: 24), value: dragOffset)
         .gesture(
             DragGesture()
                 .onChanged { value in
@@ -411,7 +411,7 @@ struct CountdownPagesView: View {
                 .onEnded { value in
                     // Determine if drag was sufficient to change cards
                     let threshold = cardWidth / 8
-                    let drag = value.translation.width
+                    let drag = value.predictedEndTranslation.width
                     var newIndex = selectedIndex
                     
                     // Swipe left: go to next card

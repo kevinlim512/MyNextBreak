@@ -27,6 +27,7 @@ class CountdownModel: ObservableObject {
 
     // Listen to AppStorage changes for working days configuration
     @AppStorage("workingDaysArray") private var workingDaysArray: String = "true,true,true,true,true,false,false"
+    @AppStorage("includePublicHolidaysInNextTimeOff") private var includePublicHolidaysInNextTimeOff: Bool = true
     private var cancellables = Set<AnyCancellable>()        // Combine cancellables
 
     init() {
@@ -88,16 +89,49 @@ class CountdownModel: ObservableObject {
         return consecutiveDays
     }
 
+    /// Finds the next day off based on working days and optional holiday inclusion.
+    private func nextTimeOffDate(
+        from date: Date,
+        workingDays: [Bool],
+        holidays: [Holiday],
+        includeHolidays: Bool
+    ) -> Date? {
+        let calendar = Calendar.singapore
+        let nextScheduledDayOff = calendar.nextDayOff(startingAfter: date, workingDays: workingDays)
+        guard includeHolidays else { return nextScheduledDayOff }
+
+        let startOfToday = calendar.startOfDay(for: date)
+        let nextHoliday = holidays
+            .map { calendar.startOfDay(for: $0.date) }
+            .filter { $0 >= startOfToday }
+            .min()
+
+        switch (nextScheduledDayOff, nextHoliday) {
+        case (nil, nil):
+            return nil
+        case (let scheduled?, nil):
+            return scheduled
+        case (nil, let holiday?):
+            return holiday
+        case (let scheduled?, let holiday?):
+            return min(scheduled, holiday)
+        }
+    }
+
     /// Updates all countdown targets based on current date and configuration
     /// Called periodically and when settings change
     private func updateTargets() {
         let now = Date()
-        let calendar = Calendar.singapore
         guard workingDaysArray.split(separator: ",").count == 7 else { return }
         let workingDays = workingDaysArray.split(separator: ",").map { $0 == "true" }
 
-        // 1) Calculate next non-working day
-        if let dayOff = calendar.nextDayOff(startingAfter: now, workingDays: workingDays) {
+        // 1) Calculate next non-working day, optionally including public holidays
+        if let dayOff = nextTimeOffDate(
+            from: now,
+            workingDays: workingDays,
+            holidays: store.holidays,
+            includeHolidays: includePublicHolidaysInNextTimeOff
+        ) {
             nextNonWorkingDate = dayOff
         } else {
             nextNonWorkingDate = now

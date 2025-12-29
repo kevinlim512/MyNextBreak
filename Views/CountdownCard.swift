@@ -17,6 +17,7 @@ struct CountdownCard: View {
     let background: LinearGradient  // Gradient background for the card
     let cardHeight: CGFloat   // Fixed height for consistent card sizing
     let subtitle: String?  // Optional subtitle (e.g., holiday name)
+    let showsWeekday: Bool
     let onEdit: (() -> Void)?
 
     init(
@@ -26,6 +27,7 @@ struct CountdownCard: View {
         background: LinearGradient,
         cardHeight: CGFloat,
         subtitle: String? = nil,
+        showsWeekday: Bool = false,
         onEdit: (() -> Void)? = nil
     ) {
         self.title = title
@@ -34,6 +36,7 @@ struct CountdownCard: View {
         self.background = background
         self.cardHeight = cardHeight
         self.subtitle = subtitle
+        self.showsWeekday = showsWeekday
         self.onEdit = onEdit
     }
 
@@ -64,6 +67,13 @@ struct CountdownCard: View {
                 }
                 
                 // Target date display
+                if showsWeekday {
+                    Text(target, format: Date.FormatStyle().weekday(.wide))
+                        .font(.title3)
+                        .foregroundColor(.white.opacity(0.9))
+                        .shadow(radius: 2)
+                }
+
                 Text(target, style: .date)
                     .font(.title2)
                     .foregroundColor(.white)

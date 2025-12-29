@@ -6,6 +6,7 @@ struct SettingsView: View {
     // MARK: - Properties
     @AppStorage("workingDaysArray") private var workingDaysArray: String = "true,true,true,true,true,false,false"
     @AppStorage("hasCompletedSetup") private var hasCompletedSetup: Bool = false
+    @AppStorage("includePublicHolidaysInNextTimeOff") private var includePublicHolidaysInNextTimeOff: Bool = true
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var model: CountdownModel
     @StateObject private var holidayStore = HolidayStore()
@@ -46,6 +47,12 @@ struct SettingsView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                }
+
+                Section(header: Text("Countdown Settings")) {
+                    Toggle(isOn: $includePublicHolidaysInNextTimeOff) {
+                        Text("Public Holidays in \"Next Time Off\"")
+                    }
                 }
                 
                 // Holiday Database Management Section
