@@ -1,93 +1,68 @@
 # MyNextBreak (iOS)
 
-A SwiftUI app for Singapore that tracks your next day off, the next public holiday, and the next long weekend — plus a planning view that suggests when to take 1–2 days of leave to create 4+ day breaks. Built with SwiftUI and Combine, with on-device caching of public holiday data from data.gov.sg.
+MyNextBreak is a SwiftUI app for Singapore that helps you answer one question fast: *when’s my next break?* It tracks your next time off, the next public holiday, and the next long weekend — and it includes a leave‑planning view that suggests when to take 1–2 days of annual leave to create 4+ day breaks.
 
 ## Features
-- Swipeable countdown cards: next day off, next public holiday, next long weekend
-- Leave planning: recommendations to stack annual leave around holidays (4+ day weekends)
-- First‑run setup: pick your working days (Mon–Sun)
-- Settings: adjust working days and refresh the holiday database
-- Smart titles: “Time Off!”/“Day Off!” adapts to your current day and schedule
-- Offline support: holiday datasets cached on device; works after first download
-- Singapore‑aware: dates calculated using Asia/Singapore timezone and local rules
+- **Countdowns tab**
+  - Swipeable, gradient countdown cards with page indicators
+  - Smart “Next Time Off” card (uses your working‑days schedule; optionally includes public holidays)
+  - “Next Public Holiday” and “Next Long Weekend” countdowns (Singapore calendar + timezone)
+- **Custom countdowns**
+  - Create unlimited personal countdowns (e.g., Holiday, Pay Day)
+  - Monthly repeat (choose day of month) or weekly repeat (choose weekday + interval)
+  - Edit and delete countdowns; pick a card style/gradient
+- **Leave planning**
+  - Recommendations around upcoming public holidays (aims for 4+ consecutive days off using up to 2 leave days)
+  - Handles practical rules like Sunday holidays observed on Monday and avoiding Saturday holidays when Saturday is already non‑working
+- **Home screen widget (WidgetKit)**
+  - Small + medium widget that shows the countdown you picked in‑app
+  - Supports default countdowns (Next Time Off / Next Public Holiday / Next Long Weekend) and any custom countdown
+- **Offline-first holiday data**
+  - Downloads Singapore public holiday datasets and caches them on-device
+  - Shows download status (years + last updated) and lets you refresh manually
+- **First‑run setup + settings**
+  - Choose working days (Mon–Sun) on first launch; adjust any time in Settings
+  - Toggle whether public holidays count as “Next Time Off”
+  - Option to redo the initial setup flow
 
 ## Requirements
-- Xcode 15 or newer
-- iOS 17.0+ (iPhone and iPad supported)
+- Xcode 15+
+- iOS 17.0+ (iPhone + iPad)
 
 ## Getting Started
-- Open `Countdown App.xcodeproj` in Xcode.
-- Select the “Countdown App” scheme and a simulator or device.
-- Build and run. On first launch, complete the quick working‑days setup.
+1. Open `MyNextBreak.xcodeproj` in Xcode.
+2. Select the `MyNextBreak` scheme and a simulator/device.
+3. Build and run, then complete the working‑days setup.
 
-No third‑party package dependencies are required.
+No third‑party Swift Package dependencies are required.
 
-## How It Works
-- Data source: Public holidays are fetched from data.gov.sg datasets and merged across years for a complete view.
-- Caching: JSON responses are stored under the app’s Documents directory as `holidaysYYYY.json` and merged on load for fast startup and offline use.
-- Timezone: All calculations use the Singapore timezone to keep dates consistent.
+## Widget Setup (Dev Notes)
+The widget and app share data via an App Group.
+- App Group ID is defined in `Models/WidgetCountdownConfig.swift` (`WidgetConstants.appGroupId`) and must match:
+  - `MyNextBreak.entitlements`
+  - `Countdown App WidgetExtension.entitlements`
+- In-app: Settings → Widget → “Choose Widget Countdown”, then add the widget from the iOS home screen.
 
-## App Structure
-- Entry: `HolidayCountdownApp.swift` — App entry point
-- Views:
-  - `Views/ContentView.swift` — Swipeable countdown carousel with crescent layout
-  - `Views/CountdownCard.swift` — Reusable, gradient countdown card
-  - `Views/SetupView.swift` — First‑run working‑days setup
-  - `Views/SettingsView.swift` — Working days + holiday data refresh
-  - `Views/PlanView.swift` — Leave recommendations (4+ day weekends)
-- Models:
-  - `Models/CountdownModel.swift` — Live countdown targets and formatting
-  - `Models/LeaveRecommendation.swift` — Logic to propose leave days around holidays
-  - `Models/Calendar.swift` — Singapore calendar helpers (next day off, etc.)
-  - `Models/HolidayStore.swift` — Central store, caching and refresh cycle
-  - `Models/HolidayDownloader.swift` — Multi‑year dataset download + local merge
-  - `Models/HolidayService.swift` / `Models/HolidayAPI.swift` — Live API and decoding
-- Extensions:
-  - `Extensions/Font+Manrope.swift` — Custom font helpers with fallbacks
+## How Holiday Data Works
+- Source: data.gov.sg public holiday datasets (downloaded per-year as needed).
+- Caching: stored in the app’s Documents directory as `holidaysYYYY.json` and merged on load.
+- Timezone: all date calculations use `Asia/Singapore` to avoid “midnight drift”.
 
-## Usage Notes
-- Working days: You can reconfigure any time from Settings. The countdowns and Plan view update automatically.
-- Refreshing data: Use Settings → “Refresh Holiday Data” to force an update. The app automatically loads from cache on launch and refreshes in the background.
-- Observed holidays: Logic in the Plan view accounts for Sunday holidays (observed on Monday) and skips Saturday holidays when Saturday is already a non‑working day, to keep suggestions practical.
+## Project Structure (High-Level)
+- App entry: `HolidayCountdownApp.swift`
+- Countdowns: `Views/ContentView.swift`, `Views/CountdownPagesView.swift`, `Views/CountdownCard.swift`
+- Setup/settings: `Views/SetupView.swift`, `Views/SettingsView.swift`
+- Custom countdowns: `Views/AddCountdownView.swift`, `Views/EditCustomCountdownView.swift`, `Models/CustomEvent.swift`, `Models/CustomEventStore.swift`
+- Leave planning: `Views/PlanView.swift`, `Models/LeaveRecommendation.swift`
+- Holidays + caching: `Models/HolidayStore.swift`, `Models/HolidayDownloader.swift`, `Models/HolidayService.swift`, `Models/HolidayAPI.swift`
+- Widget: `CountdownWidget/CountdownWidget.swift`, shared data in `Models/WidgetCountdownConfig.swift`
 
-## Privacy Policy
-Effective: 2025-10-20
-
-### Overview
-- MyNextBreak does not collect, share, sell, or track any personal data.
-- The app operates on-device. Network access is only used to download public holiday datasets from data.gov.sg.
-- We do not operate any backend servers. The app runs on your device and only connects to data.gov.sg to download public holiday data.
-
-### Data We Collect
-- Personal information: none
-- Contact information: none
-- Identifiers (e.g., IDFA, device IDs): none
-- Usage/analytics: none
-- Diagnostics/crash logs: none
-
-### On-Device Data
-- Working-days preference (Mon–Sun): stored locally on your device to power countdowns and planning.
-- Cached holiday datasets: stored locally to enable offline use and faster startup.
-- Retention: data persists on your device until you delete the app or refresh the holiday cache via Settings → “Refresh Holiday Data”.
-
-### Tracking and Third Parties
-- No advertising, analytics, or other third‑party SDKs are integrated.
-- No cross‑app tracking; the app does not access or use the IDFA.
-- External services: the app connects to data.gov.sg solely to download public holiday datasets. Standard network metadata (e.g., IP address) may be visible to that service per their policies; we do not receive or store it.
-
-### Children’s Privacy
-- The app does not collect data from any users, including children under 13.
-
-### Your Choices
-- Delete the app to remove all locally stored data and caches.
-- Use Settings → “Refresh Holiday Data” to refresh or replace cached datasets.
-- Adjust working days in Settings at any time.
+## Privacy
+- No analytics, ads, tracking, or accounts.
+- Data stays on-device (working-days preference, cached holiday datasets, custom countdowns).
+- Network access is only used to download public holiday datasets from data.gov.sg.
+- Full policy: `privacy-policy.html`
 
 ## Acknowledgements
 - Public holiday data courtesy of data.gov.sg
 - Manrope typeface by Michael Sharanda (SIL Open Font License 1.1)
-
-## Roadmap Ideas
-- Widgets for upcoming day off/holiday
-- In‑app changelog for holiday database updates
-- Region selection (beyond Singapore)
