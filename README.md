@@ -2,6 +2,19 @@
 
 MyNextBreak is a SwiftUI app for Singapore that helps you answer one question fast: *when’s my next break?* It tracks your next time off, the next public holiday, and the next long weekend — and it includes a leave‑planning view that suggests when to take 1–2 days of annual leave to create 4+ day breaks.
 
+## App Store
+
+**Download on the iOS App Store:**
+https://apps.apple.com/sg/app/mynextbreak/id6753747946
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/IMG_6940.PNG" width="180" alt="MyNextBreak main screen" />
+  <img src="screenshots/IMG_6941.PNG" width="180" alt="MyNextBreak leave planning screen" />
+  <img src="screenshots/IMG_6942.PNG" width="180" alt="MyNextBreak add countdown screen" />
+</p>
+
 ## Features
 - **Countdowns tab**
   - Swipeable, gradient countdown cards with page indicators
